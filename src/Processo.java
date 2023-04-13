@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Processo {
@@ -32,7 +33,16 @@ public class Processo {
             System.out.println(string);
         }
     }
-
+    public void escreveDados(){//So pra verificar
+        for (Map.Entry<String,Integer> entry : dados.entrySet()) {
+            System.out.println(entry.getKey()+" "+entry.getValue());  
+        }
+    }
+    public void escreveLabels(){//So pra verificar
+        for (Map.Entry<String,Integer> entry : labels.entrySet()) {
+            System.out.println(entry.getKey()+" "+entry.getValue());  
+        }
+    }
     private void criarProcesso (String naqr){
         boolean data = false;
         boolean code = false;
@@ -41,35 +51,37 @@ public class Processo {
         Path path2 = Paths.get(nameComplete);
             try (Scanner sc = new Scanner(Files.newBufferedReader(path2, Charset.defaultCharset()))){
                 while(sc.hasNextLine()) {
-                    String lines = sc.nextLine();
-                    String line = lines;
-                    if (lines.contains("#")){
-                    int commentPos = lines.indexOf("#");
-                    line = lines.substring(0, commentPos);
+                    
+                    String line = sc.nextLine();
+                    if (line.contains("#")){
+                        int commentPos = line.indexOf("#");
+                        line = line.substring(0, commentPos);
                     } 
-                    if(line.equals(".code")){
-                        code = true;
-                    }
-                    if(code == true){
-                        if (line.endsWith(":") == true){
-                            labels.put(line.substring(0, line.length() -1), instrucoes.size());
-                        } else{
-                            instrucoes.add(line);
-                        }
-                    }
-                    if(line.equals(".endcode")){
-                        code = false;
-                    }
                     if(line.equals(".data")){
                         data = true;
-                    }
-                    if(data == true){
-                        String[] tokens = line.split(" ");
-                        dados.put(tokens[0], Integer.parseInt(tokens[1]));
                     }
                     if(line.equals(".enddata")){
                         data = false;
                     }
+                    if(line.equals(".code")){
+                        code = true;
+                    }
+                    if(line.equals(".endcode")){
+                        code = false;
+                    }
+                    if(code == true){
+                        if (line.endsWith(":") == true){
+                            labels.put(line.substring(0, line.length() -1), instrucoes.size());
+                        } else if (!line.contains(".code")){
+                            instrucoes.add(line);
+                        }
+                    }
+                    
+                    if(data == true && !line.contains(".data")){
+                        String[] tokens = line.trim().split("\\s+");
+                        dados.put(tokens[0], Integer.parseInt(tokens[1]));
+                    }
+                    
                 }
             }catch (IOException x){
                    System.err.format("Erro de E/S: %s%n", x);
