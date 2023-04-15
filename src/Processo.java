@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Processo {
 
-    private ArrayList<String> instrucoes;
+    public ArrayList<String> instrucoes;
     private HashMap<String, Integer> dados;//A string do dado com seu valor em Integer
     private HashMap<String, Integer> labels;//Quando ler o arquivo a label vai ser o tamanho(ou seja, o indice do proximo a ser escrito)
     private int id, prio;
