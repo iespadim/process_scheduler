@@ -1,0 +1,13 @@
+.code
+  load a
+  add #3  # outro comentario #
+  sub #-1
+  sub #1
+loop: add #1 #comentario
+  store a
+  syscall 0
+.endcode
+
+.data
+  a 10
+.enddata

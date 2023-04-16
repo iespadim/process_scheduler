@@ -29,19 +29,25 @@ public class Processo {
         return this.prio;
     }
     public void imprimeInstr(){
+        System.out.println("------Instrucoes-------");
         for (String string : instrucoes) {
             System.out.println(string);
         }
+        System.out.println("-----------------------");
     }
     public void escreveDados(){//So pra verificar
+        System.out.println("--------Dados----------");
         for (Map.Entry<String,Integer> entry : dados.entrySet()) {
             System.out.println(entry.getKey()+" "+entry.getValue());  
         }
+        System.out.println("-----------------------");
     }
     public void escreveLabels(){//So pra verificar
+        System.out.println("-------Labels----------");
         for (Map.Entry<String,Integer> entry : labels.entrySet()) {
             System.out.println(entry.getKey()+" "+entry.getValue());  
         }
+        System.out.println("------------------------");
     }
     private void criarProcesso (String naqr){
         boolean data = false;
@@ -51,12 +57,11 @@ public class Processo {
         Path path2 = Paths.get(nameComplete);
             try (Scanner sc = new Scanner(Files.newBufferedReader(path2, Charset.defaultCharset()))){
                 while(sc.hasNextLine()) {
-                    
                     String line = sc.nextLine();
+                    line.trim();
                     if (line.contains("#")){
-                        int commentPos = line.indexOf("#");
-                        line = line.substring(0, commentPos);
-                    } 
+                        line = limpaComentario(line);
+                    }
                     if(line.equals(".data")){
                         data = true;
                     }
@@ -80,7 +85,7 @@ public class Processo {
                                 }
                             }
                         } else if (!line.contains(".code")) {
-                            instrucoes.add(line);
+                            instrucoes.add(line.trim());
                         }
                     }
 
@@ -95,6 +100,37 @@ public class Processo {
                    System.err.format("Erro de E/S: %s%n", x);
             }
     
-        }    
+        }
+
+        public String limpaComentario(String line){
+        line = line.trim();
+            // count number of "#"
+            // save the index of the second #
+            int count = 0;
+            int index = 0;
+            for (int i = 0; i < line.length(); i++) {
+                if (line.charAt(i) == '#') {
+                    count++;
+                    if (count == 2) {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            //if count == 1, then it is a simple comment
+            if (count == 1) {
+                String[] operations = {"ADD", "SUB", "MULT", "DIV"};
+                for (String operation : operations) {
+                    if (line.toUpperCase().contains(operation)) {
+                        return line;
+                    }
+                }
+                int commentPos = line.indexOf("#");
+                line = line.substring(0, commentPos);
+            } else if (count == 2) {
+                line = line.substring(0, index);
+            }
+            return line;
+        }
     }
 
