@@ -1,6 +1,6 @@
 import java.util.NoSuchElementException;
 
-public class Heapprocess {//Fila de prioridade para o algoritmo RR
+public class Heapprocess {
     private Processo[] heapArray;
     private int currentSize;
     private boolean debugMode;
@@ -27,11 +27,25 @@ public class Heapprocess {//Fila de prioridade para o algoritmo RR
         int index = currentSize;
         currentSize++;
 
-        while (index > 0 && heapArray[index].getPrio() < heapArray[(index - 1) / 2].getPrio()) {
+        shiftUp(index);
+    }
+
+    private void shiftUp(int index) {
+        while (index > 0) {
+            int parentIndex = (index - 1) / 2;
+
+            if (heapArray[index].getPrio() > heapArray[parentIndex].getPrio()) {
+                break;
+            } else if (heapArray[index].getPrio() == heapArray[parentIndex].getPrio()) {
+                if (index > parentIndex) {
+                    break;
+                }
+            }
+
             Processo temp = heapArray[index];
-            heapArray[index] = heapArray[(index - 1) / 2];
-            heapArray[(index - 1) / 2] = temp;
-            index = (index - 1) / 2;
+            heapArray[index] = heapArray[parentIndex];
+            heapArray[parentIndex] = temp;
+            index = parentIndex;
         }
     }
 
@@ -45,7 +59,12 @@ public class Heapprocess {//Fila de prioridade para o algoritmo RR
         heapArray[0] = heapArray[currentSize - 1];
         currentSize--;
 
-        int index = 0;
+        shiftDown(0);
+
+        return min;
+    }
+
+    public void shiftDown(int index) {//Deixar esse publico, acaba o Quantum da o shiftDown, ele passa a ser o ultimo processo com essa prioridade a executar
         while (true) {
             int leftChildIndex = 2 * index + 1;
             int rightChildIndex = 2 * index + 2;
@@ -68,9 +87,8 @@ public class Heapprocess {//Fila de prioridade para o algoritmo RR
             heapArray[smallestChildIndex] = temp;
             index = smallestChildIndex;
         }
-
-        return min;
     }
+
 
     public Processo peek() {
         if (isEmpty()) {
