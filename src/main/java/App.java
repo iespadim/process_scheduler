@@ -11,7 +11,7 @@ public class App {
         Heapprocess heap = new Heapprocess(3,printDebug);
         heap.insert(proc);
         heap.insert(proc1);
-        heap.insert(proc3);
+        //heap.insert(proc3);
         heap.executa();
 
     }
