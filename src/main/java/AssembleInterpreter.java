@@ -64,10 +64,13 @@ public class AssembleInterpreter {
                     store(partes[1]);
                     break;
                 case "BRANY":
+                    brany(partes[1]);
                     break;
                 case "BRPOS":
+                    brpos(partes[1]);
                     break;
                 case "BRZERO":
+                    brzero(partes[1]);
                     break;
                 case "BRNEG":
                     break;
@@ -84,6 +87,46 @@ public class AssembleInterpreter {
             System.out.println("PC: " + pc);
             System.out.println("ACC: " + acc);
         }
+    }
+
+    private void brpos(String parte) {
+        //Se acc > 0 então pc <- op1
+        if (printDebug) {
+            System.out.println("BRPOS: " + parte);
+        }
+        if (acc > 0) {
+            if(!processo.getLabels().containsKey(parte)){
+                System.out.println("Erro: Label não encontrada: " + parte);
+                return;
+            }
+            pc = processo.getLabels().get(parte);
+        }
+    }
+
+    private void brzero(String parte) {
+        //Se acc = 0 então pc <- op1
+        if (printDebug) {
+            System.out.println("BRZERO: " + parte);
+        }
+        if (acc == 0) {
+            if(!processo.getLabels().containsKey(parte)){
+                System.out.println("Erro: Label não encontrada: " + parte);
+                return;
+            }
+            pc = processo.getLabels().get(parte);
+        }
+    }
+
+    private void brany(String parte) {
+        //pc <- label
+        if (printDebug) {
+            System.out.println("BRANY: " + parte);
+        }
+        if(!processo.getLabels().containsKey(parte)){
+            System.out.println("Erro: Label não encontrada: " + parte);
+            return;
+        }
+        pc = processo.getLabels().get(parte);
     }
 
     private void store(String parte) {

@@ -1,7 +1,7 @@
 public class App {
     public static void main(String[] args) throws Exception {
         boolean printDebug = true;
-        Processo proc = new Processo("prog0.txt", 0, 0);
+        Processo proc = new Processo("prog2.txt", 0, 0);
         proc.imprimeInstr();
         proc.escreveDados();
         proc.escreveLabels();

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Processo {
 
@@ -63,9 +65,8 @@ public class Processo {
             try (Scanner sc = new Scanner(Files.newBufferedReader(path2, Charset.defaultCharset()))){
                 while(sc.hasNextLine()) {
                     String line = sc.nextLine();
-                    line.trim();
                     if (line.contains("#")){
-                        line = limpaComentario(line);
+                        line = limpaComentario2(line);
                     }
                     if(line.equals(".data")){
                         data = true;
@@ -107,8 +108,45 @@ public class Processo {
     
         }
 
-        public String limpaComentario(String line){
+    public String limpaComentario(String line) {
         line = line.trim();
+        int count = 0;
+        int index = 0;
+
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) == '#') {
+                count++;
+                if (count == 2) {
+                    index = i;
+                    break;
+                }
+            }
+        }
+
+        if (count == 1) {
+            int commentPos = line.indexOf("#");
+            line = line.substring(0, commentPos);
+        } else if (count == 2) {
+            line = line.substring(0, index);
+        }
+
+        String regex = "^\\s*(\\S+)?\\s*(\\S+)?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(line);
+
+        if (matcher.find()) {
+            if (matcher.group(1) != null && matcher.group(1).endsWith(":")) {
+                return (matcher.group(2) != null ? matcher.group(2) : "") + " " + (matcher.group(3) != null ? matcher.group(3) : "");
+            } else {
+                return (matcher.group(1) != null ? matcher.group(1) : "") + " " + (matcher.group(2) != null ? matcher.group(2) : "");
+            }
+        }
+
+        return "";
+    }
+
+    public String limpaComentario2(String line){
+            line = line.trim();
             // count number of "#"
             // save the index of the second #
             int count = 0;
@@ -124,6 +162,18 @@ public class Processo {
             }
             //if count == 1, then it is a simple comment
             if (count == 1) {
+                String regex = "^\\s*(\\S+)?\\s*(\\S+)?";
+                Pattern pattern = Pattern.compile(regex);
+                Matcher matcher = pattern.matcher(line);
+
+                if (matcher.find()) {
+                    if (matcher.group(1) != null && matcher.group(1).endsWith(":")) {
+                        return (matcher.group(2) != null ? matcher.group(2) : "") + " " + (matcher.group(3) != null ? matcher.group(3) : "");
+                    } else {
+                        return (matcher.group(1) != null ? matcher.group(1) : "") + " " + (matcher.group(2) != null ? matcher.group(2) : "");
+                    }
+                }
+
                 String[] operations = {"ADD", "SUB", "MULT", "DIV", "LOAD", "STORE"};
                 for (String operation : operations) {
                     if (line.toUpperCase().contains(operation)) {
