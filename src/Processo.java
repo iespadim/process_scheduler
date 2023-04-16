@@ -69,14 +69,22 @@ public class Processo {
                     if(line.equals(".endcode")){
                         code = false;
                     }
-                    if(code == true){
-                        if (line.endsWith(":") == true){
-                            labels.put(line.substring(0, line.length() -1), instrucoes.size());
-                        } else if (!line.contains(".code")){
+                    if (code == true) {
+                        int labelPos = line.indexOf(":");
+                        if (labelPos != -1) {
+                            labels.put(line.substring(0, labelPos), instrucoes.size());
+                            if (labelPos + 1 < line.length()) {
+                                String remainingLine = line.substring(labelPos + 1).trim();
+                                if (!remainingLine.isEmpty()) {
+                                    instrucoes.add(remainingLine);
+                                }
+                            }
+                        } else if (!line.contains(".code")) {
                             instrucoes.add(line);
                         }
                     }
-                    
+
+
                     if(data == true && !line.contains(".data")){
                         String[] tokens = line.trim().split("\\s+");
                         dados.put(tokens[0], Integer.parseInt(tokens[1]));
