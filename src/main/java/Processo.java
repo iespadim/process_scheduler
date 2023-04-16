@@ -1,4 +1,5 @@
 import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -20,16 +21,19 @@ public class Processo {
     private HashMap<String, Integer> dados;//A string do dado com seu valor em Integer
     @Getter
     private HashMap<String, Integer> labels;//Quando ler o arquivo a label vai ser o tamanho(ou seja, o indice do proximo a ser escrito)
-    private int id, prio;
+    @Getter
+    @Setter
+    private int id, prio, pc, acc, quantum;
 
-    public Processo(String narq, int id, int prio){
+    public Processo(String narq, int id, int prio, int pc, int quantum){
         dados = new HashMap<>();
         labels = new HashMap<>();
         instrucoes = new ArrayList<>();
         criarProcesso(narq);
         this.id = id;
         this.prio = prio;
-       
+        this.pc = pc;
+        this.quantum = quantum;
     };
   
     public int getPrio(){

@@ -3,10 +3,14 @@ import java.util.NoSuchElementException;
 public class Heapprocess {//Fila de prioridade para o algoritmo RR
     private Processo[] heapArray;
     private int currentSize;
+    private boolean debugMode;
+    private AssembleInterpreter interpretador;
 
-    public Heapprocess(int maxSize) {
+    public Heapprocess(int maxSize,boolean debugMode) {
         heapArray = new Processo[maxSize];
         currentSize = 0;
+        this.debugMode = debugMode;
+        interpretador = new AssembleInterpreter(this.debugMode);
     }
 
     public boolean isEmpty() {
@@ -79,7 +83,21 @@ public class Heapprocess {//Fila de prioridade para o algoritmo RR
         //Executar uma linha do asm do primeiro da fila heapArray[0]
         //Se o processo acabar, remove da fila
         //Se não acabar, atualiza a prioridade e insere na fila novamente
-
+        int result;
+        while(!isEmpty()){
+            Processo proc = removeMin();
+            interpretador.load(proc);
+            result=interpretador.executa(proc.getQuantum());
+            if(result==1){
+                if(debugMode) System.out.println("Processo "+proc.getId()+" executou mais uma vez");
+                proc.setPrio(proc.getPrio()+1);
+                interpretador.unload();
+                insert(proc);
+            }else{
+                if(debugMode) System.out.println("Processo "+proc.getId()+" terminou");
+                interpretador.unload();
+            }
+        }
     }
     
 }
