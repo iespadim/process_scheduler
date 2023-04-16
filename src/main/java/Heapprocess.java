@@ -77,6 +77,9 @@ public class Heapprocess {//Fila de prioridade para o algoritmo RR
 
     public void executa(){
         //Executar uma linha do asm do primeiro da fila heapArray[0]
+        //Se o processo acabar, remove da fila
+        //Se não acabar, atualiza a prioridade e insere na fila novamente
+
     }
     
 }
