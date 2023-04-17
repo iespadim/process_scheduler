@@ -1,3 +1,7 @@
+package simulation;
+
+import graph.GraphCpuWatcher;
+
 import java.util.NoSuchElementException;
 
 public class Heapprocess {
@@ -5,12 +9,17 @@ public class Heapprocess {
     private int currentSize;
     private boolean debugMode;
     private AssembleInterpreter interpretador;
+    private GraphCpuWatcher watcher;
+    int cpuTickCounter;
+
 
     public Heapprocess(int maxSize,boolean debugMode) {
         heapArray = new Processo[maxSize];
         currentSize = 0;
         this.debugMode = debugMode;
         interpretador = new AssembleInterpreter(this.debugMode);
+        watcher = GraphCpuWatcher.getInstance();
+        cpuTickCounter = watcher.getCpuTickCounter();
     }
 
     public boolean isEmpty() {
@@ -105,6 +114,7 @@ public class Heapprocess {
         while(!isEmpty()){
             Processo proc = removeMin();
             interpretador.load(proc);
+            int initialTick = watcher.getCpuTickCounter();
             result=interpretador.executa(proc.getQuantum());
             if(result==1){
                 if(debugMode) System.out.println("Processo "+proc.getId()+" executou mais uma vez");
@@ -115,6 +125,9 @@ public class Heapprocess {
                 if(debugMode) System.out.println("Processo "+proc.getId()+" terminou");
                 interpretador.unload();
             }
+            watcher.registrarProcesso(proc, initialTick, watcher.getCpuTickCounter());
+            System.out.println("Processo "+proc.getId()+" executou de "+initialTick+" a "+watcher.getCpuTickCounter());
+            if(debugMode) System.out.println("Processo "+proc.getId()+" executou "+(watcher.getCpuTickCounter()-initialTick)+" ticks de CPU");
         }
     }
     

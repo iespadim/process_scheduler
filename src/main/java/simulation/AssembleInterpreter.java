@@ -1,3 +1,7 @@
+package simulation;
+
+import graph.GraphCpu;
+import graph.GraphCpuWatcher;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -26,6 +30,7 @@ public class AssembleInterpreter {
     public int pc;
     public int acc;
     boolean printDebug;
+    GraphCpuWatcher watcher;
 
     public AssembleInterpreter(Processo processo) {
         this.processo = processo;
@@ -36,6 +41,7 @@ public class AssembleInterpreter {
 
     public AssembleInterpreter(boolean printDebug) {
         this.printDebug = printDebug;
+        watcher = GraphCpuWatcher.getInstance();
     }
 
     public void load(Processo p){
@@ -103,6 +109,7 @@ public class AssembleInterpreter {
                     break;
             }
             pc++; // Atualizar o PC (Program Counter)
+            watcher.incrementTickCounter();
         }
         return result;
     }
