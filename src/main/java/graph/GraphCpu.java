@@ -49,7 +49,8 @@ public class GraphCpu extends JFrame {
             //minInitTick in processos.get(i).getInitTick()
             //maxEndTick in processos.get(i).getEndTick()
             int minInitTick = processos.get(i).filhos.get(0).getInitTick();
-            int maxEndTick = processos.get(i).filhos.get(processos.size()).getEndTick();
+            int qtFilhos = processos.get(i).getFilhos().size();
+            int maxEndTick = processos.get(i).filhos.get(qtFilhos-1).getEndTick();
 
 
             Task t = new Task("Processo " + processid, new SimpleTimePeriod(minInitTick,maxEndTick));
