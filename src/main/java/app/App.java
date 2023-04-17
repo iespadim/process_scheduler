@@ -10,9 +10,9 @@ public class App {
     public static void main(String[] args) throws Exception {
         boolean printDebug = false;
         Processo proc1 = new Processo("src/test/java/testCases/soma_de_1_a_5.txt", 1, 1,0,4);
-        Processo proc2 = new Processo("src/test/java/testCases/soma_de_1_a_10.txt", 2, 2,0,6);
-        Processo proc3 = new Processo("src/test/java/testCases/prog2.txt", 3, 0,0,4);
-        Processo proc4 = new Processo("src/test/java/testCases/colorado.txt", 4, 0,0,4);
+        Processo proc2 = new Processo("src/test/java/testCases/soma_de_1_a_10.txt", 2, 1,0,4);
+        Processo proc3 = new Processo("src/test/java/testCases/prog2.txt", 3, 1,0,4);
+        Processo proc4 = new Processo("src/test/java/testCases/colorado.txt", 4, 1,0,4);
 
         //proc.imprimeInstr();
         //proc.escreveDados();
@@ -22,6 +22,7 @@ public class App {
         Heapprocess heap = new Heapprocess(3,printDebug);
         heap.insert(proc1);
         heap.insert(proc2);
+        heap.insert(proc3);
         heap.executa();
 
         //gera grafico

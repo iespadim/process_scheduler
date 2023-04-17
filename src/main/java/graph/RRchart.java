@@ -214,10 +214,11 @@ public class RRchart extends JFrame {
             Task t = new Task( pt[i].id,
                     new SimpleTimePeriod( pt[i].startTime,
                             pt[i].turnaroundTime));
-
+            System.out.println("processo " + pt[i].id + " iniciou em " + pt[i].startTime + " e terminou em " + pt[i].turnaroundTime);
             // show subtasks (if any)
             for(int j=0; j < pt[i].subtask.size(); j++) {
                 GraphProcess p = pt[i].subtask.get(j);
+                System.out.println("Processo " + p.id +" filho de " +pt[i].id +" iniciou em " + p.startTime + " e terminou em " + (p.startTime + p.burstTime));
                 Task subt = new Task( p.id,
                         new SimpleTimePeriod( p.startTime, p.startTime +
                                 p.burstTime));

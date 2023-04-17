@@ -44,11 +44,21 @@ public class GraphCpu extends JFrame {
 
         for (int i = 0; i < processos.size(); i++) {
             int processid = processos.get(i).getId();
-            Task t = new Task("Processo " + processid, new SimpleTimePeriod(processos.get(i).getInitTick(), processos.get(i).getEndTick()));
+
+            //calcula largura em unidades de tempo
+            //minInitTick in processos.get(i).getInitTick()
+            //maxEndTick in processos.get(i).getEndTick()
+            int minInitTick = processos.get(i).filhos.get(0).getInitTick();
+            int maxEndTick = processos.get(i).filhos.get(processos.size()).getEndTick();
+
+
+            Task t = new Task("Processo " + processid, new SimpleTimePeriod(minInitTick,maxEndTick));
+            System.out.println("processo " + processid + " iniciou em " + minInitTick + " e terminou em " + maxEndTick);
 
             //filhos
             for (int j = 0; j < processos.get(i).getFilhos().size(); j++) {
                 ProcessoGraphObj p = processos.get(i).getFilhos().get(j);
+                System.out.println("processo " + p.getId() + " filho de " + processid + " iniciou em " + p.getInitTick() + " e terminou em " + p.getEndTick());
                 Task subt = new Task("Processo " + processid, new SimpleTimePeriod(p.getInitTick(),p.getEndTick()));
                 t.addSubtask(subt);
             }

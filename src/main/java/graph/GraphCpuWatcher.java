@@ -16,11 +16,6 @@ public class GraphCpuWatcher {
 
 
     public void registrarProcesso(Processo p, int cicloInicial, int cicloFinal){
-        if(processosGraph.isEmpty()){
-            processosGraph.add(new ProcessoGraphObj(p, cicloInicial, cicloFinal));
-            return;
-        }
-
         boolean contem = false;
         int index = 0;
         for (int i = 0; i < processosGraph.size(); i++) {
@@ -34,6 +29,7 @@ public class GraphCpuWatcher {
            processosGraph.get(index).getFilhos().add(new ProcessoGraphObj(p, cicloInicial, cicloFinal));
         }else{
             processosGraph.add(new ProcessoGraphObj(p, cicloInicial, cicloFinal));
+            processosGraph.get(processosGraph.size()-1).getFilhos().add(new ProcessoGraphObj(p, cicloInicial, cicloFinal));
         }
     }
 
