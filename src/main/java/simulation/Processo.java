@@ -25,9 +25,9 @@ public class Processo {
     private HashMap<String, Integer> labels;//Quando ler o arquivo a label vai ser o tamanho(ou seja, o indice do proximo a ser escrito)
     @Getter
     @Setter
-    private int id, prio, pc, acc, quantum;
+    private int id, prio, pc, acc, quantum, tempo;
 
-    public Processo(String narq, int id, int prio, int pc, int quantum){
+    public Processo(String narq, int id, int prio, int pc, int quantum, int tempo){
         dados = new HashMap<>();
         labels = new HashMap<>();
         instrucoes = new ArrayList<>();
@@ -36,6 +36,7 @@ public class Processo {
         this.prio = prio;
         this.pc = pc;
         this.quantum = quantum;
+        this.tempo = tempo;
     };
   
     public int getPrio(){
