@@ -2,6 +2,8 @@ package simulation;
 
 import graph.GraphCpuWatcher;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 
 public class RoundRobin {
@@ -19,14 +21,26 @@ public class RoundRobin {
     private boolean debugMode;
     private AssembleInterpreter interpretador;
     private GraphCpuWatcher watcher;
+    private ArrayList<Processo> finalizados;
+    private HashMap<Integer, Processo> meusProcessos;
     int cpuTickCounter;
 
-
+    
     public RoundRobin(boolean debugMode) {
         this.debugMode = debugMode;
+        meusProcessos = new HashMap<Integer, Processo>();
+        finalizados = new ArrayList<Processo>();
         interpretador = new AssembleInterpreter(this.debugMode);
         watcher = GraphCpuWatcher.getInstance();
         cpuTickCounter = watcher.getCpuTickCounter();
+    }
+
+    public void recebeProc(Integer tempExec, Processo proc) {
+        this.meusProcessos.put(tempExec, proc);
+    }
+
+    private void finalizaProc(Integer chave){
+        this.finalizados.add(meusProcessos.get(chave));
     }
 
     public void insert(Processo processo) {
@@ -68,11 +82,18 @@ public class RoundRobin {
         //Se o processo acabar, remove da fila
         //Se não acabar, atualiza e insere na fila novamente
         int result;
-        while(!isEmpty()){
-            Processo proc = removeMin();
-            interpretador.load(proc);
-            int initialTick = watcher.getCpuTickCounter();
-            result=interpretador.executa(proc.getQuantum());
+        while(finalizados.size() != meusProcessos.size()){//Enquanto a lista de processos finalizados tem tamanho diferente dos processos carregados
+            if(meusProcessos.containsKey(watcher.getCpuTickCounter())){//Se há processo que inicia neste tempo
+                insert(meusProcessos.get(watcher.getCpuTickCounter()));//Ele é inserido na fila de prontos
+            }
+            //int initialTick = watcher.getCpuTickCounter();
+            if(!isEmpty()){//Se a fila não está vazia
+                Processo proc = removeMin();//proc recebe cabeça da fila
+                interpretador.load(proc);//Interpreta proc
+                int initialTick = watcher.getCpuTickCounter();
+                result=interpretador.executa(proc.getQuantum());
+            }
+            //result=interpretador.executa(proc.getQuantum());
             if(result==1){
                 if(debugMode) System.out.println("Processo "+proc.getId()+" executou mais uma vez");
                 proc.setPrio(proc.getPrio()+1);
