@@ -92,9 +92,22 @@ public class RoundRobin {
                 interpretador.load(proc);//Interpreta proc
                 int initialTick = watcher.getCpuTickCounter();
                 result=interpretador.executa(proc.getQuantum());
+                if(result==1){
+                    if(debugMode) System.out.println("Processo "+proc.getId()+" executou mais uma vez");
+                    proc.setPrio(proc.getPrio()+1);
+                    interpretador.unload();
+                    insert(proc);
+                }else{
+                    if(debugMode) System.out.println("Processo "+proc.getId()+" terminou");
+                    interpretador.unload();
+                }
+                watcher.registrarProcesso(proc, initialTick, watcher.getCpuTickCounter());
+                System.out.println("Processo "+proc.getId()+" executou de "+initialTick+" a "+watcher.getCpuTickCounter());
+                if(debugMode) System.out.println("Processo "+proc.getId()+" executou "+(watcher.getCpuTickCounter()-initialTick)+" ticks de CPU");
             }
+            watcher.incrementTickCounter();
             //result=interpretador.executa(proc.getQuantum());
-            if(result==1){
+            /*if(result==1){
                 if(debugMode) System.out.println("Processo "+proc.getId()+" executou mais uma vez");
                 proc.setPrio(proc.getPrio()+1);
                 interpretador.unload();
@@ -103,9 +116,10 @@ public class RoundRobin {
                 if(debugMode) System.out.println("Processo "+proc.getId()+" terminou");
                 interpretador.unload();
             }
+            watcher.incrementTickCounter();
             watcher.registrarProcesso(proc, initialTick, watcher.getCpuTickCounter());
             System.out.println("Processo "+proc.getId()+" executou de "+initialTick+" a "+watcher.getCpuTickCounter());
-            if(debugMode) System.out.println("Processo "+proc.getId()+" executou "+(watcher.getCpuTickCounter()-initialTick)+" ticks de CPU");
+            if(debugMode) System.out.println("Processo "+proc.getId()+" executou "+(watcher.getCpuTickCounter()-initialTick)+" ticks de CPU");*/
         }
     }
 
