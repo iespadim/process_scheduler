@@ -19,7 +19,7 @@ done:
 .endcode
 
 .data
-  n 0
+  n 20
   i 0
   sum 0
 .enddata
