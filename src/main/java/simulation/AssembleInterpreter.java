@@ -1,9 +1,7 @@
 package simulation;
 
-import graph.GraphCpu;
 import graph.GraphCpuWatcher;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 import java.util.Scanner;
@@ -27,15 +25,15 @@ public class AssembleInterpreter {
      Sistema            SYSCALL index                              Chamada de sistema
      */
     private Processo processo;
-    public int pc;
-    public int acc;
+    //public int pc;
+    //public int acc;
     boolean printDebug;
     GraphCpuWatcher watcher;
 
     public AssembleInterpreter(Processo processo) {
         this.processo = processo;
-        this.pc = 0;
-        this.acc = 0;
+        //this.pc = 0;
+        //this.acc = 0;
         printDebug = false;
     }
 
@@ -44,30 +42,50 @@ public class AssembleInterpreter {
         watcher = GraphCpuWatcher.getInstance();
     }
 
-    public void load(Processo p){
+    public void loadProcess(Processo p){
         this.processo = p;
-        this.pc = p.getPc();
-        this.acc = p.getAcc();
+//        this.pc = p.getPc();
+//        this.acc = p.getAcc();
+    }
+
+    public void loadProcess(int i) {
+        if (i==-1){
+            Processo p = Processo.idleProcess();
+            loadProcess(p);
+            executa(1,p);
+            unload();
+        }
     }
 
     public void unload(){
-        processo.setPc(pc);
-        processo.setAcc(acc);
+//        processo.setPc(pc);
+//        processo.setAcc(acc);
+        //zera
+        processo= null;
+//        this.pc = 0;
+//        this.acc = 0;
     }
 
-    public int executa(int ciclos) {
-        int result = 1;
+    public int executa(int ciclos, Processo processo) {
+        int result = 10;
         //for ciclos
         for (int i =0; i<ciclos;i++){
-            if (pc >= processo.getInstrucoes().size()) {
-                System.out.println("Fim do programa");
-                System.out.println("PC: " + pc);
-                System.out.println("ACC: " + acc);
+            if(processo.getId()==-1){
+                result=-1;
+            }
+
+            if(processo.getTimeRemaining()==1){
+                //acabou o tempo de execução, ultima volta
+                result=3;
+            }else{
+                processo.setTimeRemaining(processo.getTimeRemaining()-1);
+            }
+
+            if (processo.getPc() >= processo.getInstrucoes().size()){
                 result= 0;
                 return result;
             }
-
-            String instrucao = processo.getInstrucoes().get(pc);
+            String instrucao = processo.getInstrucoes().get(processo.getPc());
             String[] partes = instrucao.split("\\s+");
 
             switch (partes[0].toUpperCase()) {
@@ -102,46 +120,50 @@ public class AssembleInterpreter {
                     brneg(partes[1]);
                     break;
                 case "SYSCALL":
-                    syscall(partes[1]);
+                    result = syscall(partes[1]);
+                    break;
+                case "IDLE":
+                    if (printDebug) System.out.println("IDLE");
                     break;
                 default:
                     System.out.println("Instrução desconhecida: " + partes[0]);
                     break;
             }
-            pc++; // Atualizar o PC (Program Counter)
+            processo.setPc(processo.getPc()+1);
             watcher.incrementTickCounter();
         }
         return result;
     }
 
-    private void syscall(String parte){
+    private int syscall(String parte){
         //Chamada de sistema
         //index = 0: halt.
         //index = 1: impressão tela + bloqueio de execução (8 a 10 unidades de tempo).
         //index = 2: leitura teclado + bloqueio de execução (8 a 10 unidades de tempo).
+        int i = -1;
+
         if (printDebug) System.out.println("SYSCALL: " + parte);
         switch (parte) {
-            case "0":
-                System.out.println("Fim do programa");
-                System.out.println("PC: " + pc);
-                System.out.println("ACC: " + acc);
+            case "-1":
+                //System.out.println("idle");
                 break;
+            case "0":
+                if (printDebug) System.out.println("syscall halt");
+                return 0;
             case "1":
                 if (printDebug) System.out.println("Impressão tela + bloqueio de execução (8 a 10 unidades de tempo).");
-                System.out.println(acc);
-                //todo bloqueio de execução
-                break;
+                return 1;
             case "2":
                 if (printDebug) System.out.println("Leitura teclado + bloqueio de execução (8 a 10 unidades de tempo).");
                 System.out.println("Digite um valor: ");
                 Scanner scanner = new Scanner(System.in);
-                acc = scanner.nextInt();
-                //todo bloqueio de execução
-                break;
+                processo.setPc(scanner.nextInt());
+                return 2;
             default:
-                if (printDebug) System.out.println("Erro: SYSCALL não reconhecido: " + parte);
-                break;
+                System.out.println("Erro: SYSCALL não reconhecido: " + parte);
+                return -2;
         }
+        return i;
     }
 
     private void brneg(String parte) {
@@ -149,12 +171,13 @@ public class AssembleInterpreter {
         if (printDebug) {
             System.out.println("BRNEG: " + parte);
         }
-        if (acc < 0) {
+        if (processo.getAcc() < 0) {
             if(!processo.getLabels().containsKey(parte)){
                 System.out.println("Erro: Label não encontrada: " + parte);
                 return;
             }
-            pc = processo.getLabels().get(parte)-1;
+            processo.setPc(processo.getLabels().get(parte)-1);
+            //pc = processo.getLabels().get(parte)-1;
         }
     }
 
@@ -163,12 +186,13 @@ public class AssembleInterpreter {
         if (printDebug) {
             System.out.println("BRPOS: " + parte);
         }
-        if (acc > 0) {
+        if (processo.getAcc() > 0) {
             if(!processo.getLabels().containsKey(parte)){
                 System.out.println("Erro: Label não encontrada: " + parte);
                 return;
             }
-            pc = processo.getLabels().get(parte)-1;
+            processo.setPc(processo.getLabels().get(parte)-1);
+            //pc = processo.getLabels().get(parte)-1;
         }
     }
 
@@ -177,12 +201,13 @@ public class AssembleInterpreter {
         if (printDebug) {
             System.out.println("BRZERO: " + parte);
         }
-        if (acc == 0) {
+        if (processo.getAcc() == 0) {
             if(!processo.getLabels().containsKey(parte)){
                 System.out.println("Erro: Label não encontrada: " + parte);
                 return;
             }
-            pc = processo.getLabels().get(parte)-1;
+            processo.setPc(processo.getLabels().get(parte)-1);
+            //pc = processo.getLabels().get(parte)-1;
         }
     }
 
@@ -195,7 +220,8 @@ public class AssembleInterpreter {
             System.out.println("Erro: Label não encontrada: " + parte);
             return;
         }
-        pc = processo.getLabels().get(parte)-1;
+        processo.setPc(processo.getLabels().get(parte)-1);
+        //pc = processo.getLabels().get(parte)-1;
     }
 
     private void store(String parte) {
@@ -204,9 +230,9 @@ public class AssembleInterpreter {
             return;
         }
         if (printDebug) {
-            System.out.print("store(op,acc):" + parte + " = " + acc);
+            System.out.print("store(op,acc):" + parte + " = " + processo.getAcc());
         }
-        processo.getDados().put(parte, acc);
+        processo.getDados().put(parte, processo.getAcc());
         if (printDebug) {
             System.out.println(": " + processo.getDados().get(parte));
         }
@@ -216,39 +242,39 @@ public class AssembleInterpreter {
         //acc=(op1)
         if (parte.charAt(0) == '#') {
             if (printDebug) {
-                System.out.print("load(acc=op):acc " + acc + " = " + Integer.parseInt(parte.substring(1)));
+                System.out.print("load(acc=op):acc " + processo.getAcc() + " = " + Integer.parseInt(parte.substring(1)));
             }
-            acc = Integer.parseInt(parte.substring(1));
+            processo.setAcc(Integer.parseInt(parte.substring(1)));
+            //acc = Integer.parseInt(parte.substring(1));
             if (printDebug) {
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         } else {
-            if (printDebug) {
-                System.out.print("load(acc=op):acc " + acc + " = " + processo.getDados().get(parte));
-            }
-            acc = processo.getDados().get(parte);
-            if (printDebug) {
-                System.out.println(": " + acc);
-            }
+            if (printDebug) System.out.print("load(acc=op):acc " + processo.getAcc() + " = " + processo.getDados().get(parte));
+            processo.setAcc(processo.getDados().get(parte));
+            //acc = processo.getDados().get(parte);
+            if (printDebug) System.out.println(": " + processo.getAcc());
         }
     }
 
     private void div(String parte) {
         if (parte.charAt(0) == '#') {
             if (printDebug) {
-                System.out.print("div(acc,op):acc " + acc + " / " + Integer.parseInt(parte.substring(1)));
+                System.out.print("div(acc,op):acc " + processo.getAcc() + " / " + Integer.parseInt(parte.substring(1)));
             }
-            acc = acc / Integer.parseInt(parte.substring(1));
+            processo.setAcc(processo.getAcc() / Integer.parseInt(parte.substring(1)));
+            //acc = acc / Integer.parseInt(parte.substring(1));
             if (printDebug) {
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         } else {
             if (printDebug) {
-                System.out.print("div(acc,op):acc " + acc + " / " + processo.getDados().get(parte));
+                System.out.print("div(acc,op):acc " + processo.getAcc() + " / " + processo.getDados().get(parte));
             }
-            acc = acc / processo.getDados().get(parte);
+            processo.setAcc(processo.getAcc() / processo.getDados().get(parte));
+            //acc = acc / processo.getDados().get(parte);
             if (printDebug) {
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         }
     }
@@ -256,19 +282,21 @@ public class AssembleInterpreter {
     private void mult(String parte) {
         if (parte.charAt(0) == '#') {
             if (printDebug) {
-                System.out.print("mult(acc,op):acc " + acc + " * " + Integer.parseInt(parte.substring(1)));
+                System.out.print("mult(acc,op):acc " + processo.getAcc() + " * " + Integer.parseInt(parte.substring(1)));
             }
-            acc = acc * Integer.parseInt(parte.substring(1));
+            processo.setAcc(processo.getAcc() * Integer.parseInt(parte.substring(1)));
+            //acc = acc * Integer.parseInt(parte.substring(1));
             if (printDebug) {
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         } else {
             if (printDebug) {
-                System.out.print("mult(acc,op):acc " + acc + " * " + processo.getDados().get(parte));
+                System.out.print("mult(acc,op):acc " + processo.getAcc() + " * " + processo.getDados().get(parte));
             }
-            acc = acc * processo.getDados().get(parte);
+            processo.setAcc(processo.getAcc() * processo.getDados().get(parte));
+            //acc = acc * processo.getDados().get(parte);
             if (printDebug) {
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         }
     }
@@ -276,19 +304,21 @@ public class AssembleInterpreter {
     private void sub(String parte) {
         if (parte.charAt(0) == '#') {
             if (printDebug) {
-                System.out.print("sub(acc-op):acc " + acc + " - " + Integer.parseInt(parte.substring(1)));
+                System.out.print("sub(acc-op):acc " + processo.getAcc() + " - " + Integer.parseInt(parte.substring(1)));
             }
-            acc = acc - Integer.parseInt(parte.substring(1));
+            processo.setAcc(processo.getAcc() - Integer.parseInt(parte.substring(1)));
+            //acc = acc - Integer.parseInt(parte.substring(1));
             if (printDebug) {
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         } else {
             if (printDebug) {
-                System.out.print("sub(acc-op):acc " + acc + " - " + processo.getDados().get(parte));
+                System.out.print("sub(acc-op):acc " + processo.getAcc() + " - " + processo.getDados().get(parte));
             }
-            acc = acc - processo.getDados().get(parte);
+            processo.setAcc(processo.getAcc() - processo.getDados().get(parte));
+            //acc = acc - processo.getDados().get(parte);
             if (printDebug) {
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         }
     }
@@ -297,22 +327,22 @@ public class AssembleInterpreter {
         if (parte.charAt(0) == '#') {
             //literal
             if(printDebug){
-                System.out.print("add(acc,op):acc " + acc + " + " + Integer.parseInt(parte.substring(1)));
+                System.out.print("add(acc,op):acc " + processo.getAcc() + " + " + Integer.parseInt(parte.substring(1)));
             }
-            acc = acc + Integer.parseInt(parte.substring(1));
+            processo.setAcc(processo.getAcc() + Integer.parseInt(parte.substring(1)));
+            //acc = acc + Integer.parseInt(parte.substring(1));
             if(printDebug){
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         } else {
             if(printDebug){
-                System.out.print("add(acc,op):acc " + acc + " + " + processo.getDados().get(parte));
+                System.out.print("add(acc,op):acc " + processo.getAcc() + " + " + processo.getDados().get(parte));
             }
-            acc = acc + processo.getDados().get(parte);
+            processo.setAcc(processo.getAcc() + processo.getDados().get(parte));
+            //acc = acc + processo.getDados().get(parte);
             if(printDebug){
-                System.out.println(": " + acc);
+                System.out.println(": " + processo.getAcc());
             }
         }
     }
-
-
 }

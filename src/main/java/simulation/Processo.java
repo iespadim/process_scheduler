@@ -1,6 +1,7 @@
 package simulation;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.IOException;
@@ -15,6 +16,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class Processo {
 
     @Getter
@@ -25,7 +27,9 @@ public class Processo {
     private HashMap<String, Integer> labels;//Quando ler o arquivo a label vai ser o tamanho(ou seja, o indice do proximo a ser escrito)
     @Getter
     @Setter
-    private int id, prio, pc, acc, quantum;
+    private int id, prio, pc, acc, quantum, timeRemaining,blockedUntil;
+
+
 
     public Processo(String narq, int id, int prio, int pc, int quantum){
         dados = new HashMap<>();
@@ -37,6 +41,25 @@ public class Processo {
         this.pc = pc;
         this.quantum = quantum;
     };
+
+    public static Processo idleProcess(){
+        Processo p = new Processo();
+        p.id = -1;
+        p.setQuantum(1);
+        p.setTimeRemaining(1);
+        p.instrucoes.add("idle 0");
+        return p;
+    }
+    public Processo(){
+        dados = new HashMap<>();
+        labels = new HashMap<>();
+        instrucoes = new ArrayList<>();
+
+        this.id = 0;
+        this.prio = 0;
+        this.pc = 0;
+        this.quantum = 0;
+    }
   
     public int getPrio(){
         return this.prio;

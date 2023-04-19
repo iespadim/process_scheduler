@@ -2,92 +2,146 @@ package simulation;
 
 import graph.GraphCpuWatcher;
 
-import java.util.NoSuchElementException;
+import java.util.*;
 
-public class RoundRobin {
 
-    private class Node {
-        Processo processo;
-        Node next;
-
-        Node(Processo processo2) {
-            this.processo = processo2;
-        }
-    }
-
-    private Node head;
+public class RoundRobin extends PoliticaDeEscalonamento {
     private boolean debugMode;
     private AssembleInterpreter interpretador;
     private GraphCpuWatcher watcher;
-    int cpuTickCounter;
+    int watcherCpuTickCounter;
+//    private Node head;
 
 
     public RoundRobin(boolean debugMode) {
         this.debugMode = debugMode;
         interpretador = new AssembleInterpreter(this.debugMode);
         watcher = GraphCpuWatcher.getInstance();
-        cpuTickCounter = watcher.getCpuTickCounter();
+        watcherCpuTickCounter = watcher.getCpuTickCounter();
     }
 
-    public void insert(Processo processo) {
-        head = insertRecursive(head, new Node(processo));//recursao inicial com a cabeça e novo nodo
-    }
-    
-    private Node insertRecursive(Node atualComparado, Node nodoInserido) {
-        if (atualComparado == null || nodoInserido.processo.getPrio() < atualComparado.processo.getPrio() ) {//Se a cabeça é nula ou o processo tem maior prioridade
-            nodoInserido.next = atualComparado;//Nodo inserido.next = cabeça
-            return nodoInserido;//Cabeça agora é o nodo inserido
-        }else {
-            atualComparado.next = insertRecursive(atualComparado.next, nodoInserido);//segue a lista
-            return atualComparado;
+    public Processo getNextProcess(Cpu cpu) {
+        organizaFilas(cpu);
+
+        int size = cpu.getFilaProntos().size();
+        if (size > 0) {
+            Processo processo = cpu.filaProntos.get(0);
+            cpu.filaProntos.remove(0);
+            return processo;
+        } else{
+            return Processo.idleProcess();
         }
     }
 
-
-    public Processo removeMin() {
-        if (head == null) {
-            return null;
-        }
-        
-        Processo minProcess = head.processo;
-        head = head.next;
-        return minProcess;
+    public int getTimeAllowance(Cpu cpu) {
+        return cpu.getExecutando().getQuantum();
     }
 
-    private boolean isEmpty() {
-        if(this.head == null){
-            return true;
-        }
-        return false;
+    public int getTimeAllowance(Processo p) {
+        return p.getQuantum();
     }
 
-    
+    public void organizaFilas(Cpu cpu) {
 
-    public void executa(){
-        //Executar uma linha do asm do primeiro da fila head
-        //Se o processo acabar, remove da fila
-        //Se não acabar, atualiza e insere na fila novamente
-        int result;
-        while(!isEmpty()){
-            Processo proc = removeMin();
-            interpretador.load(proc);
-            int initialTick = watcher.getCpuTickCounter();
-            result=interpretador.executa(proc.getQuantum());
-            if(result==1){
-                if(debugMode) System.out.println("Processo "+proc.getId()+" executou mais uma vez");
-                proc.setPrio(proc.getPrio()+1);
-                interpretador.unload();
-                insert(proc);
-            }else{
-                if(debugMode) System.out.println("Processo "+proc.getId()+" terminou");
-                interpretador.unload();
+        ArrayList<Processo> filaProntos = (ArrayList<Processo>) cpu.getFilaProntos().clone();
+        ArrayList<Processo> filaBloqueados = cpu.getFilaBloqueados();
+
+        cpu.getFilaProntos().clear();
+        //ArrayList newFilaProntos = new ArrayList<Processo>();
+        for (int i = 0; i < filaProntos.size(); i++) {
+            insereNaArrayListComPrioridade(cpu,filaProntos.get(i));
+        }
+
+        if (!filaBloqueados.isEmpty()){
+            for (int i = 0; i < filaBloqueados.size(); i++) {
+                if (cpu.getCpuTickCounter() >= filaBloqueados.get(i).getBlockedUntil()){
+                    filaBloqueados.get(i).setBlockedUntil(0);
+                    insereNaArrayListComPrioridade(cpu,filaBloqueados.get(i));
+                    filaBloqueados.remove(filaBloqueados.get(i));
+                }
             }
-            watcher.registrarProcesso(proc, initialTick, watcher.getCpuTickCounter());
-            System.out.println("Processo "+proc.getId()+" executou de "+initialTick+" a "+watcher.getCpuTickCounter());
-            if(debugMode) System.out.println("Processo "+proc.getId()+" executou "+(watcher.getCpuTickCounter()-initialTick)+" ticks de CPU");
         }
+
+    }
+    public void insereNaArrayListComPrioridade(Cpu cpu, Processo processoInserido) {
+        int posicaoInsercao = 0;
+        ArrayList<Processo> lista = cpu.getFilaProntos();
+
+        // Encontrar a posição correta de inserção com base na prioridade
+        for (int i = 0; i < lista.size(); i++) {
+            if (processoInserido.getPrio() < lista.get(i).getPrio()) {
+                posicaoInsercao = i;
+                break;
+            }
+            posicaoInsercao = i + 1;
+        }
+        // Inserir o processo na posição correta
+        lista.add(posicaoInsercao, processoInserido);
     }
 
-   
-    
+//    private class Node {
+//        Processo processo;
+//        Node next;
+//
+//        Node(Processo processo2) {
+//            this.processo = processo2;
+//        }
+//    }
+//
+//    public void insert(Processo processo) {
+//        head = insertRecursive(head, new Node(processo));//recursao inicial com a cabeça e novo nodo
+//        //filaProntos.add(processo);
+//    }
+//
+//    private Node insertRecursive(Node atualComparado, Node nodoInserido) {
+//        if (atualComparado == null || nodoInserido.processo.getPrio() < atualComparado.processo.getPrio() ) {//Se a cabeça é nula ou o processo tem maior prioridade
+//            nodoInserido.next = atualComparado;//Nodo inserido.next = cabeça
+//            return nodoInserido;//Cabeça agora é o nodo inserido
+//        }else {
+//            atualComparado.next = insertRecursive(atualComparado.next, nodoInserido);//segue a lista
+//            return atualComparado;
+//        }
+//    }
+//
+//    public Processo removeMin() {
+//        if (head == null) {
+//            return null;
+//        }
+//
+//        Processo minProcess = head.processo;
+//        head = head.next;
+//        return minProcess;
+//    }
+//
+//    private boolean isEmpty() {
+//        if(this.head == null){
+//            return true;
+//        }
+//        return false;
+//    }
+//
+//
+//
+//    public void executa(){
+//        int result;
+//
+//        while(!isEmpty()){
+//            Processo proc = removeMin();
+//            interpretador.loadProcess(proc);
+//            int initialTick = watcher.getCpuTickCounter();
+//            result=interpretador.executa(proc.getQuantum(),proc);
+//
+//            if(result==1){
+//                if(debugMode) System.out.println("Processo "+proc.getId()+" executou mais uma vez");
+//                interpretador.unload();
+//                insert(proc);
+//            }else{
+//                if(debugMode) System.out.println("Processo "+proc.getId()+" terminou");
+//                interpretador.unload();
+//            }
+//            watcher.registrarProcesso(proc, initialTick, watcher.getCpuTickCounter());
+//            System.out.println("Processo "+proc.getId()+" executou de "+initialTick+" a "+watcher.getCpuTickCounter());
+//            if(debugMode) System.out.println("Processo "+proc.getId()+" executou "+(watcher.getCpuTickCounter()-initialTick)+" ticks de CPU");
+//        }
+//    }
 }

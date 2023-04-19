@@ -17,10 +17,12 @@ import java.util.Date;
 
 public class GraphCpu extends JFrame {
     private static GraphCpuWatcher watcher;
+    private final boolean debugMode;
 
-    public GraphCpu(String title) {
+    public GraphCpu(String title, boolean debugMode) {
         super(title);
         this.watcher = watcher.getInstance();
+        this.debugMode = debugMode;
 
         IntervalCategoryDataset dataset = createDataset();
 
@@ -52,14 +54,20 @@ public class GraphCpu extends JFrame {
             int qtFilhos = processos.get(i).getFilhos().size();
             int maxEndTick = processos.get(i).filhos.get(qtFilhos-1).getEndTick();
 
-
-            Task t = new Task("Processo " + processid, new SimpleTimePeriod(minInitTick,maxEndTick));
-            System.out.println("processo " + processid + " iniciou em " + minInitTick + " e terminou em " + maxEndTick);
+            Task t;
+            if(processid ==-1){
+                // desenhar idle
+                t = new Task("Idle", new SimpleTimePeriod(minInitTick,maxEndTick));
+            } else{
+                // desenhar processo normal
+                t = new Task("Processo " + processid, new SimpleTimePeriod(minInitTick,maxEndTick));
+                System.out.println("processo " + processid + " iniciou em " + minInitTick + " e terminou em " + maxEndTick);
+            }
 
             //filhos
             for (int j = 0; j < processos.get(i).getFilhos().size(); j++) {
                 ProcessoGraphObj p = processos.get(i).getFilhos().get(j);
-                System.out.println("processo " + p.getId() + " filho de " + processid + " iniciou em " + p.getInitTick() + " e terminou em " + p.getEndTick());
+                System.out.println("etapa de " + processid + " iniciou em " + p.getInitTick() + " e terminou em " + p.getEndTick());
                 Task subt = new Task("Processo " + processid, new SimpleTimePeriod(p.getInitTick(),p.getEndTick()));
                 t.addSubtask(subt);
             }

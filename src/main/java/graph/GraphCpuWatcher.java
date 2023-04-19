@@ -1,6 +1,7 @@
 package graph;
 
 import lombok.Getter;
+import lombok.Setter;
 import simulation.Processo;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ public class GraphCpuWatcher {
     @Getter
     ArrayList<int[]> tempos;
     @Getter
+    @Setter
     private int cpuTickCounter;
 
 
