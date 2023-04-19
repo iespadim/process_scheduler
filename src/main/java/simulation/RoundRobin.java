@@ -5,7 +5,7 @@ import graph.GraphCpuWatcher;
 import java.util.*;
 
 
-public class RoundRobin extends PoliticaDeEscalonamento {
+public class RoundRobin implements PoliticaDeEscalonamento{
     private boolean debugMode;
     private AssembleInterpreter interpretador;
     private GraphCpuWatcher watcher;
@@ -44,6 +44,7 @@ public class RoundRobin extends PoliticaDeEscalonamento {
     public void organizaFilas(Cpu cpu) {
 
         ArrayList<Processo> filaProntos = (ArrayList<Processo>) cpu.getFilaProntos().clone();
+        ArrayList<Processo> filaEspera = cpu.getFilaEspera();
         ArrayList<Processo> filaBloqueados = cpu.getFilaBloqueados();
 
         cpu.getFilaProntos().clear();
@@ -58,6 +59,15 @@ public class RoundRobin extends PoliticaDeEscalonamento {
                     filaBloqueados.get(i).setBlockedUntil(0);
                     insereNaArrayListComPrioridade(cpu,filaBloqueados.get(i));
                     filaBloqueados.remove(filaBloqueados.get(i));
+                }
+            }
+        }
+
+        if (!filaEspera.isEmpty()){
+            for (int i = 0; i < filaEspera.size(); i++) {
+                if (cpu.getCpuTickCounter() >= filaEspera.get(i).getTempoDeEntrada()){
+                    insereNaArrayListComPrioridade(cpu,filaEspera.get(i));
+                    filaEspera.remove(filaEspera.get(i));
                 }
             }
         }

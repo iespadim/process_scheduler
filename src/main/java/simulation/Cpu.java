@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class Cpu {
     public int idleTime;
     AssembleInterpreter interpretador;
-    RoundRobin scheduler;
+    PoliticaDeEscalonamento scheduler;
 
     @Getter
     ArrayList<Processo> filaBloqueados;
@@ -20,6 +20,8 @@ public class Cpu {
     ArrayList<Processo> filaProntos;
     @Getter
     ArrayList<Processo> filaTerminados;
+    @Getter
+    ArrayList<Processo> filaEspera;
     @Getter
     HashMap<String,ArrayList> filas;
     @Getter
@@ -34,7 +36,7 @@ public class Cpu {
 
     private GraphCpuWatcher watcher;
 
-    public Cpu(RoundRobin s, boolean debugMode, int maxCycles) {
+    public Cpu(PoliticaDeEscalonamento s, boolean debugMode, int maxCycles) {
         scheduler = s;
         interpretador = new AssembleInterpreter(debugMode);
         this.maxCycles = maxCycles;
@@ -43,10 +45,13 @@ public class Cpu {
         this.filaBloqueados = new ArrayList<>();
         this.filaProntos = new ArrayList<>();
         this.filaTerminados = new ArrayList<>();
+        this.filaEspera = new ArrayList<>();
+
         this.filas = new HashMap<>();
         filas.put("filaBloqueados", filaBloqueados);
         filas.put("filaProntos", filaProntos);
         filas.put("filaTerminados", filaTerminados);
+        filas.put("filaEspera", filaEspera);
 
 
         cpuTickCounter= 0;
@@ -59,7 +64,7 @@ public class Cpu {
         // Sempre roda
         while (true) {
             // Verifica se chegou ao máximo de ciclos
-            if (idleTime >= maxCycles && filaBloqueados.isEmpty()) {
+            if (idleTime >= maxCycles && filaEspera.isEmpty() && filaBloqueados.isEmpty()) {
                 break;
             }
 
@@ -147,8 +152,12 @@ public class Cpu {
     }
 
     public void agendarProcesso(Processo proc) {
+        //if processo.tempoDeEntrada < cpuTickCounter = add to fila espera
+        if(proc.getTempoDeEntrada() > cpuTickCounter){
+            filaEspera.add(proc);
+        }else {
+            filaProntos.add(proc);
+        }
         proc.setTimeRemaining(scheduler.getTimeAllowance(proc));
-        filaProntos.add(proc);
-
     }
 }

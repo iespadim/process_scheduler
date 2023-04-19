@@ -68,7 +68,7 @@ public class AssembleInterpreter {
 
     public int executa(int ciclos, Processo processo) {
         int result = 10;
-        //for ciclos
+
         for (int i =0; i<ciclos;i++){
             if(processo.getId()==-1){
                 result=-1;
@@ -85,6 +85,7 @@ public class AssembleInterpreter {
                 result= 0;
                 return result;
             }
+
             String instrucao = processo.getInstrucoes().get(processo.getPc());
             String[] partes = instrucao.split("\\s+");
 
@@ -157,7 +158,7 @@ public class AssembleInterpreter {
                 if (printDebug) System.out.println("Leitura teclado + bloqueio de execução (8 a 10 unidades de tempo).");
                 System.out.println("Digite um valor: ");
                 Scanner scanner = new Scanner(System.in);
-                processo.setPc(scanner.nextInt());
+                processo.setAcc(scanner.nextInt());
                 return 2;
             default:
                 System.out.println("Erro: SYSCALL não reconhecido: " + parte);
