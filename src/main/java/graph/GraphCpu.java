@@ -71,10 +71,51 @@ public class GraphCpu extends JFrame {
                 Task subt = new Task("Processo " + processid, new SimpleTimePeriod(p.getInitTick(),p.getEndTick()));
                 t.addSubtask(subt);
             }
-
             series.add(t);
 
         }
+        //calcula processingTime
+        System.out.println("calculando processingTime");
+        for (ProcessoGraphObj pai : processos) {
+            int duracaoTotal = 0;
+            for (ProcessoGraphObj filho: pai.getFilhos()) {
+                int duracaoParticial = filho.getEndTick() - filho.getInitTick();
+                duracaoTotal += duracaoParticial;
+            }
+            pai.setProcessingTime(duracaoTotal);
+            if(pai.getId()==-1){
+                System.out.println("tempo idle foi de " + duracaoTotal);
+            }else{
+                System.out.println("processingTime de " + pai.getId() + " foi de " + duracaoTotal);
+            }
+        }
+        System.out.println();
+        System.out.println("calculando turnaroundTime");
+        //calcula turnaroundTime
+        for (ProcessoGraphObj pai : processos) {
+            int minInitTick = pai.filhos.get(0).getInitTick();
+            int maxEndTick = pai.filhos.get(pai.getFilhos().size()-1).getEndTick();
+
+            int duracaoTotal = maxEndTick - minInitTick;
+
+            if(pai.getId()!=-1){
+                pai.setTurnaroundTime(duracaoTotal);
+                System.out.println("turnaroundTime de " + pai.getId() + " foi de " + duracaoTotal);
+            }else{
+                pai.setTurnaroundTime(duracaoTotal);
+            }
+        }
+
+        //nao deu tempo de terminar
+//        System.out.println();
+//        System.out.println("calculando tempo de espera");
+//        for (ProcessoGraphObj pai : processos) {
+//            if(pai.getId()!=-1){
+//                int tempoDeEspera = pai.getWaitingTime();
+//                System.out.println("tempo de espera de " + pai.getId() + " foi de " + tempoDeEspera);
+//            }
+//        }
+
         TaskSeriesCollection dataset = new TaskSeriesCollection();
         dataset.add(series);
         return dataset;

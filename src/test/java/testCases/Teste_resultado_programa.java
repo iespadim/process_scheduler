@@ -153,7 +153,4 @@ public class Teste_resultado_programa {
             Assertions.assertEquals(15, processo.getAcc());
         }
     }
-
-
-
 }

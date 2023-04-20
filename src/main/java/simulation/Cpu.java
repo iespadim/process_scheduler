@@ -4,6 +4,7 @@ import graph.GraphCpuWatcher;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import simulation.scheduler.PoliticaDeEscalonamento;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,6 +73,7 @@ public class Cpu {
             executando = null;
             executandoWatcher = null;
             Processo p = scheduler.getNextProcess(this);
+
             executando = p;
 
             // Carrega o processo a ser executado
@@ -130,8 +132,10 @@ public class Cpu {
                     } else { // Processo pronto para continuar
                         //caso 10 - ok
                     }
+                    if(i==timesToRun){
+                        watcher.registrarProcesso(executandoWatcher, initialTick, cpuTickCounter);
+                    }
                 }
-                watcher.registrarProcesso(executandoWatcher, initialTick, cpuTickCounter);
             }
         }
     }

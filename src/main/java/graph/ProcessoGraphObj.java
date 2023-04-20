@@ -9,7 +9,7 @@ import java.util.ArrayList;
 class ProcessoGraphObj {
     @Getter
     @Setter
-    private int id, prio, pc, acc, quantum, initTick, endTick;
+    private int id, prio, pc, acc, quantum, initTick, endTick,processingTime, waitingTime, turnaroundTime;
     @Getter
     ArrayList<ProcessoGraphObj> filhos;
 

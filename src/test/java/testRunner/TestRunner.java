@@ -3,8 +3,8 @@ package testRunner;
 import graph.GraphCpu;
 import simulation.Cpu;
 import simulation.Processo;
-import simulation.RoundRobin;
-import simulation.SJF;
+import simulation.scheduler.RoundRobin;
+import simulation.scheduler.SJF;
 
 import javax.swing.*;
 import java.util.ArrayList;

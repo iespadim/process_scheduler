@@ -35,6 +35,22 @@ public class GraphCpuWatcher {
         }
     }
 
+    public void registrarEspera(Processo p, int qnt){
+        boolean contem = false;
+        int index = 0;
+        for (int i = 0; i < processosGraph.size(); i++) {
+            if (processosGraph.get(i).getId() == p.getId()) {
+                contem = true;
+                index = i;
+            }
+        }
+
+        if(contem){
+            processosGraph.get(index).setWaitingTime(processosGraph.get(index).getWaitingTime() + qnt);
+        }
+    }
+
+
     //singleton
     private GraphCpuWatcher() {
         processosGraph = new ArrayList<ProcessoGraphObj>();

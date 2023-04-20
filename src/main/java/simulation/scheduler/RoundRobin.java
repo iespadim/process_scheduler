@@ -1,11 +1,15 @@
-package simulation;
+package simulation.scheduler;
 
 import graph.GraphCpuWatcher;
+import simulation.AssembleInterpreter;
+import simulation.Cpu;
+import simulation.Processo;
+import simulation.scheduler.PoliticaDeEscalonamento;
 
 import java.util.*;
 
 
-public class RoundRobin implements PoliticaDeEscalonamento{
+public class RoundRobin implements PoliticaDeEscalonamento {
     private boolean debugMode;
     private AssembleInterpreter interpretador;
     private GraphCpuWatcher watcher;
@@ -25,8 +29,8 @@ public class RoundRobin implements PoliticaDeEscalonamento{
 
         int size = cpu.getFilaProntos().size();
         if (size > 0) {
-            Processo processo = cpu.filaProntos.get(0);
-            cpu.filaProntos.remove(0);
+            Processo processo = cpu.getFilaProntos().get(0);
+            cpu.getFilaProntos().remove(0);
             return processo;
         } else{
             return Processo.idleProcess();

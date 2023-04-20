@@ -1,4 +1,7 @@
-package simulation;
+package simulation.scheduler;
+
+import simulation.Cpu;
+import simulation.Processo;
 
 public interface PoliticaDeEscalonamento {
 
