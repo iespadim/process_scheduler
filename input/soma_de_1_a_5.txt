@@ -1,0 +1,24 @@
+.code
+ load n #le n
+ mult #-1  #multiplica por -1
+ store n   #guarda em n
+loop:
+ load n       #carrega n
+ brzero done  #se n = 0 termina
+ mult #-1     #n que estava negativo, positivará
+ add sum      #adiciona sum a n
+ store sum    #guarda sum
+ load n
+ add #1
+ store n
+ brany loop
+done:
+  load sum       # Carrega o valor da variável "sum" no registrador acc  
+  syscall 0      # Encerra o programa
+.endcode
+
+.data
+  n 5
+  i 0
+  sum 0
+.enddata

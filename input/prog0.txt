@@ -1,0 +1,11 @@
+.code
+  add #5
+  add a
+  store b
+.endcode
+
+.data
+  a 10
+  5 8
+  b 0
+.enddata

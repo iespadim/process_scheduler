@@ -1,0 +1,10 @@
+.code
+loop:
+ add #1909
+ syscall 1
+ load #0
+ brany loop
+.endcode
+
+.data
+.enddata

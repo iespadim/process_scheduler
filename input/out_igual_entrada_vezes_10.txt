@@ -1,0 +1,13 @@
+.code
+ syscall 2
+ store n
+ load #0
+ load n
+ mult #10
+ syscall 1
+ syscall 0
+.endcode
+
+.data
+ n 0
+.enddata
